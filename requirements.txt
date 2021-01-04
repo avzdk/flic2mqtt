@@ -1,0 +1,2 @@
+paho-mqtt
+https://raw.githubusercontent.com/50ButtonsEach/fliclib-linux-hci/master/clientlib/python/fliclib.py
