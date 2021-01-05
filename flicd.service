@@ -1,0 +1,17 @@
+[Unit]
+Description=flicd Service
+After=bluetooth.service
+Requires=bluetooth.service
+
+[Service]
+TimeoutStartSec=0
+ExecStart=/home/pi/fliclib-linux-hci-2.0.3/bin/armv6l/flicd -w -f /home/pi/fliclib-linux-hci-2.0.3/bin/armv6l/flic.sqlite3
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+#if pi is user then run "sudo setcap cap_net_admin=ep /home/pi/fliclib-linux-hci-2.0.3/bin/armv6l/flicd"
+User=pi
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
