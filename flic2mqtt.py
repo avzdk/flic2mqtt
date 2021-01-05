@@ -36,31 +36,31 @@ log.info(f"Starting service loglevel={conf['LOG']['LEVEL']} ")
 
 
 def buttonPressed(bd_addr, click_type,was_queued,time_diff):
-	buttonname=BUTTONS[bd_addr]
+	buttonname=BUTTONS.get(bd_addr,"noname")
 	if was_queued==0:
-		log.info("Flic " + BUTTONS[bd_addr] +" "+ click_type)	
-		mqtt_client = mqtt.Client(scriptname)
+		log.info("Flic " + buttonname +" "+ click_type)	
+		mqtt_client = mqtt.Client("Flic2mqtt")
 		mqtt_client.connect(MQTT_BROKER)
 		msg = {'time_send':str(datetime.datetime.now()),'clicktype':click_type, 'knap':buttonname,'adresse':bd_addr,'time_diff':time_diff, 'msg_uuid':str(uuid.uuid4())}
 		mqtt_client.publish("smarthome/flic/"+buttonname,json.dumps(msg))
 		mqtt_client.disconnect()
 		
 	else:
-		log.error("Flic kø " + BUTTONS[bd_addr] +" "+ click_type + " time_diff="+str(time_diff))
+		log.error("Flic kø " + buttonname+" "+ click_type + " time_diff="+str(time_diff))
 
 def got_info2(items):
 	for bd_addr in items["bd_addr_of_verified_buttons"]:
-		log.info("Flic knap fundet " +BUTTONS[bd_addr] +" "+ bd_addr)
+		log.info("Flic knap fundet " +BUTTONS.get(bd_addr,"noname")+" "+ bd_addr)
 
 def got_button(bd_addr):
 	cc = fliclib.ButtonConnectionChannel(bd_addr)
-	log.info("Flic knap fundet " +BUTTONS[bd_addr] +" "+ bd_addr)
+	log.info("Flic knap fundet " +BUTTONS.get(bd_addr,"noname") +" "+ bd_addr)
 	cc.on_button_single_or_double_click_or_hold = \
 		lambda channel, click_type, was_queued, time_diff: \
 			buttonPressed(channel.bd_addr,str(click_type),was_queued,time_diff)		
 	cc.on_connection_status_changed = \
 		lambda channel, connection_status, disconnect_reason: \
-			log.debug("Flic "+ BUTTONS[bd_addr] +" "+channel.bd_addr + " " + str(connection_status) + (" " + str(disconnect_reason) if connection_status == fliclib.ConnectionStatus.Disconnected else ""))
+			log.debug("Flic " bd_addr+ " "+ BUTTONS.get(bd_addr,"noname") +" "+channel.bd_addr + " " + str(connection_status) + (" " + str(disconnect_reason) if connection_status == fliclib.ConnectionStatus.Disconnected else ""))
 	client.add_connection_channel(cc)
 
 def got_info(items):
@@ -69,10 +69,12 @@ def got_info(items):
 	
 			
 def main():
-	client = fliclib.FlicClient("localhost")
+	
 	client.get_info(got_info)
 	client.on_new_verified_button = got_button
 	client.handle_events()
+
+client = fliclib.FlicClient("localhost")
 
 if __name__ == "__main__":
     main()

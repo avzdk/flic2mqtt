@@ -1,1 +1,4 @@
 flic2mqtt_local.ini
+.vscode/
+*.pyc
+fliclib.py
