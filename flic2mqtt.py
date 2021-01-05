@@ -45,7 +45,8 @@ def buttonPressed(bd_addr, click_type,was_queued,time_diff):
 		mqtt_client = mqtt.Client("Flic2mqtt")
 		mqtt_client.connect(MQTT_BROKER)
 		msg = {'time_send':str(datetime.datetime.now()),'clicktype':click_type, 'knap':buttonname,'adresse':bd_addr,'time_diff':time_diff, 'msg_uuid':str(uuid.uuid4())}
-		mqtt_client.publish("smarthome/flic/"+buttonname,json.dumps(msg))
+		result = mqtt_client.publish("smarthome/flic/"+buttonname,json.dumps(msg))
+		if result[0]!=0: logger.error(f"Error sending message to mqtt. {result}")
 		mqtt_client.disconnect()
 		
 	else:
