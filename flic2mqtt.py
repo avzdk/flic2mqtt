@@ -13,18 +13,13 @@ import fliclib
 conf = configparser.ConfigParser()
 conf.read(['flic2mqtt.ini','flic2mqtt_local.ini'])
 
-BUTTONS = {\
+""" BUTTONS = {\
 	"80:e4:da:71:5a:19" : "blå" , \
 	"80:e4:da:71:5f:5b" : "gul",  \
 	"80:e4:da:70:1f:1b" : "hvid", \
 	"80:e4:da:71:3f:66" : "grøn", \
 	"80:e4:da:70:3a:66" : "sort", \
-	"80:e4:da:71:4e:ac" : "sort2"}
-
-		
-MQTT_BROKER = conf['MQTT']['Ip']
-
-
+	"80:e4:da:71:4e:ac" : "sort2"} """
 
 log = logging.getLogger(__name__)
 logging.basicConfig(
@@ -33,7 +28,15 @@ logging.basicConfig(
 )
 log.info(f"Starting service loglevel={conf['LOG']['LEVEL']} ")
 
+BUTTONS={}
 
+conf_buttons=conf['FLIC']['BUTTONS'].split(',')
+conf_names=conf['FLIC']['Names'].split(',')
+for i in range(len(conf_buttons)):
+	BUTTONS[conf_buttons[i].strip()]=conf_names[i].strip()
+log.info(BUTTONS)
+		
+MQTT_BROKER = conf['MQTT']['Ip']
 
 def buttonPressed(bd_addr, click_type,was_queued,time_diff):
 	buttonname=BUTTONS.get(bd_addr,"noname")
@@ -60,7 +63,7 @@ def got_button(bd_addr):
 			buttonPressed(channel.bd_addr,str(click_type),was_queued,time_diff)		
 	cc.on_connection_status_changed = \
 		lambda channel, connection_status, disconnect_reason: \
-			log.debug("Flic " bd_addr+ " "+ BUTTONS.get(bd_addr,"noname") +" "+channel.bd_addr + " " + str(connection_status) + (" " + str(disconnect_reason) if connection_status == fliclib.ConnectionStatus.Disconnected else ""))
+			log.debug("Flic " +bd_addr+ " "+ BUTTONS.get(bd_addr,"noname") +" "+channel.bd_addr + " " + str(connection_status) + (" " + str(disconnect_reason) if connection_status == fliclib.ConnectionStatus.Disconnected else ""))
 	client.add_connection_channel(cc)
 
 def got_info(items):
